@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AzurePipelineTasks": {
+      "commandName": "Project",
+      "commandLineArgs": "..\\..\\..\\..\\AzurePipelineAsCode.NET\""
+    }
+  }
+}
