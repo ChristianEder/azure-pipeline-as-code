@@ -14,7 +14,7 @@ steps:
   displayName: 'Build generated code'
   workingDirectory: AzurePipelineAsCode.NET
 
-- script: dotnet pack AzurePipelineAsCode.NET\AzurePipelineAsCode.NET.csproj -c Release
+- script: dotnet pack AzurePipelineAsCode.NET/AzurePipelineAsCode.NET.csproj -c Release
   displayName: 'Create nuget package'
 
 - task: PublishBuildArtifacts@1
