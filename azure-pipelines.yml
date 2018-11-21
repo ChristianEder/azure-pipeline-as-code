@@ -21,3 +21,9 @@ steps:
 
 - script: dotnet pack AzurePipelineAsCode.NET\AzurePipelineAsCode.NET.csproj -c Release
   displayName: 'Create nuget package'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish nuget as artifact'
+  inputs:
+    PathtoPublish: AzurePipelineAsCode.NET/bin/Release
+    ArtifactName: AzurePipelineAsCode.NET
