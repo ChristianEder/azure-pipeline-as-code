@@ -249,6 +249,7 @@ namespace AzurePipelineTasks
         {
             if (Directory.Exists("azure-pipelines-tasks"))
             {
+                Execute.Command("git", "submodule update --init");
                 Directory.SetCurrentDirectory("azure-pipelines-tasks");
                 Execute.Command("git", "checkout master");
                 Execute.Command("git", "pull");
