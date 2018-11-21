@@ -14,22 +14,15 @@ namespace AzurePipelineTasks
             var targetFolder = Path.Combine(args[0], "Tasks");
             Clean(targetFolder);
 
-            var currentWorkingDir = Directory.GetCurrentDirectory();
-            try
-            {
-                CloneAndEnterAzurePipelineTasksRepository();
-                RenderTasks(targetFolder);
-            }
+            UpdateAzurePipelineTasksSubmodule();
+            RenderTasks(targetFolder);
 
-            finally
-            {
-                Directory.SetCurrentDirectory(currentWorkingDir);
-            }
+
         }
 
         private static void RenderTasks(string targetFolder)
         {
-            var tasksDefinitionFiles = Directory.GetFiles("Tasks", "task.json", SearchOption.AllDirectories);
+            var tasksDefinitionFiles = Directory.GetFiles(Path.Combine("..", "azure-pipelines-tasks", "Tasks"), "task.json", SearchOption.AllDirectories);
             var taskDefinitions = tasksDefinitionFiles.Select(f => JObject.Parse(File.ReadAllText(f))).ToArray();
 
             Directory.SetCurrentDirectory("..");
@@ -245,19 +238,16 @@ namespace AzurePipelineTasks
             }
         }
 
-        private static void CloneAndEnterAzurePipelineTasksRepository()
+        private static void UpdateAzurePipelineTasksSubmodule()
         {
-            if (Directory.Exists("azure-pipelines-tasks"))
+            if (Directory.Exists(Path.Combine("..", "azure-pipelines-tasks", "Tasks")))
             {
-                Execute.Command("git", "submodule update --init");
-                Directory.SetCurrentDirectory("azure-pipelines-tasks");
-                Execute.Command("git", "checkout master");
-                Execute.Command("git", "pull");
+                Execute.Command("git", "submodule update");
             }
             else
             {
-                Execute.Command("git", "clone https://github.com/Microsoft/azure-pipelines-tasks.git");
-                Directory.SetCurrentDirectory("azure-pipelines-tasks");
+                Execute.Command("git", "submodule init");
+                Execute.Command("git", "submodule update");
             }
         }
         private static void CreateTaskInterfaces(string targetFolder, JObject[] taskDefinitions)
