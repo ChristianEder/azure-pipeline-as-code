@@ -11,7 +11,7 @@ steps:
   displayName: 'Build code generator'
   workingDirectory: AzurePipelineTasks
 
-- script: dotnet run -- ..\..\..\..\AzurePipelineAsCode.NET
+- script: dotnet run -- ../../../../AzurePipelineAsCode.NET
   displayName: 'Generate code'
   workingDirectory: AzurePipelineTasks
 
