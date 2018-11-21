@@ -229,9 +229,16 @@ namespace AzurePipelineTasks
 
         private static void Clean(string targetFolder)
         {
-            foreach (var file in Directory.GetFiles(targetFolder))
+            if (Directory.Exists(targetFolder))
             {
-                File.Delete(file);
+                foreach (var file in Directory.GetFiles(targetFolder))
+                {
+                    File.Delete(file);
+                }
+            }
+            else
+            {
+                Directory.CreateDirectory(targetFolder);
             }
         }
 
