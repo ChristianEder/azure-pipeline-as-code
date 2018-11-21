@@ -250,6 +250,7 @@ namespace AzurePipelineTasks
             if (Directory.Exists("azure-pipelines-tasks"))
             {
                 Directory.SetCurrentDirectory("azure-pipelines-tasks");
+                Execute.Command("git", "checkout master");
                 Execute.Command("git", "pull");
             }
             else
