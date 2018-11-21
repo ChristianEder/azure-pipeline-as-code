@@ -25,8 +25,6 @@ namespace AzurePipelineTasks
             var tasksDefinitionFiles = Directory.GetFiles(Path.Combine("..", "azure-pipelines-tasks", "Tasks"), "task.json", SearchOption.AllDirectories);
             var taskDefinitions = tasksDefinitionFiles.Select(f => JObject.Parse(File.ReadAllText(f))).ToArray();
 
-            Directory.SetCurrentDirectory("..");
-
             CreateTaskInterfaces(targetFolder, taskDefinitions);
 
             var allTaskInterfaces = GetTaskInterfaces(taskDefinitions);
