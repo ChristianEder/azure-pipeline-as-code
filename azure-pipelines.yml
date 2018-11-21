@@ -1,0 +1,23 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+pool:
+  vmImage: 'Ubuntu 16.04'
+
+steps:
+- script: dotnet build
+  displayName: 'Build code generator'
+  workingDirectory: AzurePipelineTasks
+
+- script: dotnet run -- ..\..\..\..\AzurePipelineAsCode.NET
+  displayName: 'Generate code'
+  workingDirectory: AzurePipelineTasks
+
+- script: dotnet build
+  displayName: 'Build generated code'
+  workingDirectory: AzurePipelineAsCode.NET
+
+- script: dotnet pack AzurePipelineAsCode.NET\AzurePipelineAsCode.NET.csproj -c Release
+  displayName: 'Create nuget package'
