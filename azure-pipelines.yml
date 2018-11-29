@@ -14,6 +14,10 @@ steps:
   displayName: 'Build generated code'
   workingDirectory: AzurePipelineAsCode.NET
 
+- script: dotnet run -- "../AzurePipelineAsCode.NET" "$(nugetVersionStorage)"
+  displayName: 'Update version number'
+  workingDirectory: UpdateVersionNumber
+
 - script: dotnet pack AzurePipelineAsCode.NET\AzurePipelineAsCode.NET.csproj -c Release
   displayName: 'Create nuget package'
 

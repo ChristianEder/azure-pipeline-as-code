@@ -16,8 +16,6 @@ namespace AzurePipelineTasks
 
             UpdateAzurePipelineTasksSubmodule();
             RenderTasks(targetFolder);
-
-
         }
 
         private static void RenderTasks(string targetFolder)
