@@ -1,5 +1,7 @@
-﻿using AzurePipelineAsCode.NET.Tasks;
+﻿using System;
+using AzurePipelineAsCode.NET.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace AzurePipelineAsCode.NET
@@ -20,7 +22,7 @@ namespace AzurePipelineAsCode.NET
 
             foreach (var step in Steps)
             {
-                builder.AppendLine(step.ToString());
+                builder.AppendLine(string.Join(Environment.NewLine, step.ToString().Split(new []{ Environment.NewLine }, StringSplitOptions.None).Select(l => "  " + l)));
             }
 
             return builder.ToString();

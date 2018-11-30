@@ -1,7 +1,7 @@
 pool:
   vmImage: 'Ubuntu 16.04'
 
-steps:
+steps: 
 - script: dotnet build
   displayName: 'Build code generator'
   workingDirectory: AzurePipelineTasks
@@ -18,9 +18,8 @@ steps:
   displayName: 'Create nuget with updated version number, if required'
   workingDirectory: UpdateVersionNumber
 
-
 - task: PublishBuildArtifacts@1
   displayName: 'Publish nuget as artifact'
-  inputs:
+  inputs: 
     PathtoPublish: AzurePipelineAsCode.NET/bin/Release
     ArtifactName: AzurePipelineAsCode.NET

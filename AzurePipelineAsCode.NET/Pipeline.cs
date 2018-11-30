@@ -14,6 +14,8 @@ namespace AzurePipelineAsCode.NET
 
         public List<Repository> Repositories { get; } = new List<Repository>();
 
+        public Pool Pool { get; set; }
+
         public override string ToString()
         {
             var builder = new StringBuilder();
@@ -23,9 +25,18 @@ namespace AzurePipelineAsCode.NET
                 builder.AppendLine("name: " + Name);
             }
 
-            builder.AppendLine("resources:");
-            builder.AppendLine("- repo: self");
-            builder.AppendLine("- clean: " + Clean);
+            if (Pool != null)
+            {
+                builder.AppendLine(Pool.ToString());
+            }
+
+            if (Clean != true)
+            {
+                builder.AppendLine("resources:");
+                builder.AppendLine("- repo: self");
+                builder.AppendLine("- clean: " + Clean);
+                builder.AppendLine();
+            }
 
             if (Repositories.Any())
             {
@@ -39,20 +50,25 @@ namespace AzurePipelineAsCode.NET
                 }
             }
 
-            foreach (var job in BuildJobs)
+            if (BuildJobs.Count == 1 && string.IsNullOrEmpty(BuildJobs.Single().DisplayName) &&
+                string.IsNullOrEmpty(BuildJobs.Single().Name))
             {
-                builder.AppendLine(job.ToString());
+                builder.AppendLine("steps: ");
+                foreach (var step in BuildJobs.Single().Steps)
+                {
+                    builder.AppendLine(step.ToString());
+                }
+            }
+            else
+            {
+                foreach (var job in BuildJobs)
+                {
+                    builder.AppendLine(job.ToString());
+                }
             }
 
-
-            return builder.ToString();
+            var pipeline = builder.ToString();
+            return pipeline.TrimEnd('\r', '\n') + Environment.NewLine;
         }
-    }
-
-    public class Repository
-    {
-        public string Identifier { get; set; }
-        public string Type { get; set; }
-        public string Name { get; set; }
     }
 }

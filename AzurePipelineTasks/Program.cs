@@ -57,8 +57,8 @@ namespace AzurePipelineTasks
         {{
             var builder = new System.Text.StringBuilder();
 
-            builder.AppendLine(""  - task: {taskName}"");
-            builder.AppendLine(""    displayName: "" + DisplayName);
+            builder.AppendLine(""- task: {taskName}"");
+            builder.AppendLine(""  displayName: '"" + DisplayName + ""'"");
 
             var wroteInputs = false;
 
@@ -66,10 +66,10 @@ namespace AzurePipelineTasks
             {{
                 if(!wroteInputs)
                 {{
-                    builder.AppendLine(""    inputs: "");
+                    builder.AppendLine(""  inputs: "");
                     wroteInputs = true;
                 }}
-                builder.AppendLine(""      {i["name"].ToString()}: "" + {ToUpper(i["name"].ToString())}.ToString());
+                builder.AppendLine(""    {i["name"].ToString()}: "" + {ToUpper(i["name"].ToString())}.ToString());
             }}
 "))}
         
