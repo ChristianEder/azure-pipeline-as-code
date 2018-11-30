@@ -21,7 +21,7 @@ namespace UpdateVersionNumber
     {
         static void Main(string[] args)
         {
-            var hash = CreateMd5ForFolder(Path.Combine(args[0], "Tasks"));
+            var hash = CreateMd5ForFolder(Path.Combine(args[0]));
             var account = CloudStorageAccount.Parse(args[1]);
             var tableClient = account.CreateCloudTableClient();
             var table = tableClient.GetTableReference("nuget");
@@ -103,7 +103,7 @@ namespace UpdateVersionNumber
         private static string CreateMd5ForFolder(string path)
         {
             // assuming you want to include nested folders
-            var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories)
+            var files = Directory.GetFiles(path, "*.cs", SearchOption.AllDirectories)
                                  .OrderBy(p => p).ToList();
 
             var md5 = MD5.Create();
@@ -114,7 +114,7 @@ namespace UpdateVersionNumber
 
                 // hash path
                 var relativePath = file.Substring(path.Length + 1);
-                var pathBytes = Encoding.UTF8.GetBytes(relativePath.ToLower());
+                var pathBytes = Encoding.UTF8.GetBytes(relativePath.ToLower().Replace(Path.DirectorySeparatorChar, '_'));
                 md5.TransformBlock(pathBytes, 0, pathBytes.Length, pathBytes, 0);
 
                 // hash contents
