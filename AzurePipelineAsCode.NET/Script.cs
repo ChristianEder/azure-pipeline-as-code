@@ -1,7 +1,6 @@
 ﻿using System.Text;
-using AzurePipelineAsCode.NET.Tasks;
 
-namespace AzurePipelineAsCode.NET
+namespace AzurePipelineAsCode.NET.Tasks
 {
     public class ScriptTask : IBuildTask, IReleaseTask
     {
