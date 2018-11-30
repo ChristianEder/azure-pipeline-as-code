@@ -15,11 +15,9 @@ steps:
   workingDirectory: AzurePipelineAsCode.NET
 
 - script: dotnet run -- "../AzurePipelineAsCode.NET" "$(nugetVersionStorage)"
-  displayName: 'Update version number'
+  displayName: 'Create nuget with updated version number, if required'
   workingDirectory: UpdateVersionNumber
 
-- script: dotnet pack AzurePipelineAsCode.NET/AzurePipelineAsCode.NET.csproj -c Release
-  displayName: 'Create nuget package'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish nuget as artifact'

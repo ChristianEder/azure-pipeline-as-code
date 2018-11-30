@@ -1,11 +1,19 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Xml.Linq;
+using NuGet;
+using NuGet.Common;
+using NuGet.Configuration;
+using NuGet.Protocol;
+using NuGet.Protocol.Core.Types;
+using UpdateVersionNumber.Util;
 
 namespace UpdateVersionNumber
 {
@@ -20,25 +28,48 @@ namespace UpdateVersionNumber
             table.CreateIfNotExistsAsync().Wait();
 
             var latest = GetLatestVersion(table);
-            Console.WriteLine(latest);
-            if(latest?.Hash != hash)
+            var latestVersion =
+                latest != null ? new Version(latest.Major + "." + latest.Minor + "." + latest.Patch) : null;
+
+            var projectFile = Path.Combine(args[0], "AzurePipelineAsCode.NET.csproj");
+            var project = XDocument.Parse(File.ReadAllText(projectFile));
+            var projectVersion = new Version(project.Root.Elements("PropertyGroup").First().Element("Version").Value);
+            var nextVersion = latest?.Hash == hash ? latestVersion : NextVersion(latestVersion, projectVersion);
+
+            if (nextVersion > latestVersion)
             {
-                var projectFile = Path.Combine(args[0], "AzurePipelineAsCode.NET.csproj");
-                var project = XDocument.Parse(File.ReadAllText(projectFile));
-                var projectVersion = new Version(project.Root.Elements("PropertyGroup").First().Element("Version").Value);
-                Version nextVersion = NextVersion(latest, projectVersion);
-
                 var next = new NugetPackageEntity(nextVersion.Major.ToString(), nextVersion.Minor.ToString(), nextVersion.Build.ToString(), hash);
-
-
-                project.Root.Elements("PropertyGroup").First().Element("Version").SetValue(next.Major + "." + next.Minor + "." + next.Patch);
-                File.WriteAllText(projectFile, project.ToString());
-
                 table.ExecuteAsync(TableOperation.Insert(next)).Wait();
             }
+
+            project.Root.Elements("PropertyGroup").First().Element("Version").SetValue(nextVersion.Major + "." + nextVersion.Minor + "." + nextVersion.Build);
+            File.WriteAllText(projectFile, project.ToString());
+            PackNuget(nextVersion, args[0]);
+
         }
 
-        private static Version NextVersion(NugetPackageEntity latest, Version projectVersion)
+        private static void PackNuget(Version nextVersion, string path)
+        {
+            var providers = new List<Lazy<INuGetResourceProvider>>();
+            providers.AddRange(Repository.Provider.GetCoreV3()); 
+            var packageSource = new PackageSource("https://api.nuget.org/v3/index.json");
+            var sourceRepository = new SourceRepository(packageSource, providers);
+            var packageMetadataResource = sourceRepository.GetResource<PackageMetadataResource>();
+            var version = packageMetadataResource.GetMetadataAsync("AzurePipelineAsCode.NET", true, true, new NullLogger(), CancellationToken.None).Result
+                .OfType<PackageSearchMetadata>()
+                .Max(m => m.Version.Version);
+
+            if (nextVersion <= version)
+            {
+                Console.WriteLine($"Skipping nuget pack, because the target version {nextVersion} is not greater than the latest published version {version}");
+                return;
+            }
+
+            Console.WriteLine($"Packing nuget version {nextVersion}");
+            Execute.Command("dotnet", $"pack {Path.Combine(path, "AzurePipelineAsCode.NET.csproj")} -c Release");
+        }
+
+        private static Version NextVersion(Version latest, Version projectVersion)
         {
             Version nextVersion;
             if (latest == null)
@@ -47,10 +78,9 @@ namespace UpdateVersionNumber
             }
             else
             {
-                var latestVersion = new Version(latest.Major + "." + latest.Minor + "." + latest.Patch);
-                nextVersion = projectVersion > latestVersion 
+                nextVersion = projectVersion > latest 
                     ? projectVersion 
-                    : new Version(latestVersion.Major, latestVersion.Minor, latestVersion.Build + 1);
+                    : new Version(latest.Major, latest.Minor, latest.Build + 1);
             }
 
             return nextVersion;
