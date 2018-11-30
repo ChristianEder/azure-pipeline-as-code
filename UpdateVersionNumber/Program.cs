@@ -62,6 +62,7 @@ namespace UpdateVersionNumber
             if (nextVersion <= version)
             {
                 Console.WriteLine($"Skipping nuget pack, because the target version {nextVersion} is not greater than the latest published version {version}");
+                Execute.Command("dotnet", $"build {path} -c Release");
                 return;
             }
 
