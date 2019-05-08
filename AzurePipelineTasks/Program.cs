@@ -236,15 +236,19 @@ namespace AzurePipelineTasks
 
         private static void UpdateAzurePipelineTasksSubmodule()
         {
-            if (Directory.Exists(Path.Combine("..", "azure-pipelines-tasks", "Tasks")))
-            {
-                Execute.Command("git", "submodule update");
-            }
-            else
+            if (!Directory.Exists(Path.Combine("..", "azure-pipelines-tasks", "Tasks")))
             {
                 Execute.Command("git", "submodule init");
                 Execute.Command("git", "submodule update");
             }
+
+            var currentDir = Directory.GetCurrentDirectory();
+            Directory.SetCurrentDirectory(Path.Combine(currentDir, "..", "azure-pipelines-tasks"));
+
+            Execute.Command("git", "checkout master");
+            Execute.Command("git", "pull");
+
+            Directory.SetCurrentDirectory(currentDir);
         }
         private static void CreateTaskInterfaces(string targetFolder, JObject[] taskDefinitions)
         {
