@@ -30,16 +30,16 @@ namespace UpdateVersionNumber
             var latest = GetLatestVersion(table);
             var latestVersion =
                 latest != null ? new Version(latest.Major + "." + latest.Minor + "." + latest.Patch) : null;
-            
+
             Console.WriteLine($"Hash: {hash} (latest: {(latest?.Hash ?? "none")})");
-            
+
             var projectFile = Path.Combine(args[0], "AzurePipelineAsCode.NET.csproj");
             var project = XDocument.Parse(File.ReadAllText(projectFile));
             var projectVersion = new Version(project.Root.Elements("PropertyGroup").First().Element("Version").Value);
             var nextVersion = latest?.Hash == hash ? latestVersion : NextVersion(latestVersion, projectVersion);
 
-            
-            
+
+
             if (nextVersion > latestVersion)
             {
                 var next = new NugetPackageEntity(nextVersion.Major.ToString(), nextVersion.Minor.ToString(), nextVersion.Build.ToString(), hash);
@@ -55,7 +55,7 @@ namespace UpdateVersionNumber
         private static void PackNuget(Version nextVersion, string path)
         {
             var providers = new List<Lazy<INuGetResourceProvider>>();
-            providers.AddRange(Repository.Provider.GetCoreV3()); 
+            providers.AddRange(Repository.Provider.GetCoreV3());
             var packageSource = new PackageSource("https://api.nuget.org/v3/index.json");
             var sourceRepository = new SourceRepository(packageSource, providers);
             var packageMetadataResource = sourceRepository.GetResource<PackageMetadataResource>();
@@ -83,8 +83,8 @@ namespace UpdateVersionNumber
             }
             else
             {
-                nextVersion = projectVersion > latest 
-                    ? projectVersion 
+                nextVersion = projectVersion > latest
+                    ? projectVersion
                     : new Version(latest.Major, latest.Minor, latest.Build + 1);
             }
 
@@ -107,9 +107,12 @@ namespace UpdateVersionNumber
 
         private static string CreateMd5ForFolder(string path)
         {
+            var binObj = Path.Combine("bin", "obj");
+
             // assuming you want to include nested folders
             var files = Directory.GetFiles(path, "*.cs", SearchOption.AllDirectories)
-                                 .OrderBy(p => p).ToList();
+                                 .OrderBy(p => p)
+                .Where(f => !f.Contains(binObj)).ToList();
 
             var md5 = MD5.Create();
 

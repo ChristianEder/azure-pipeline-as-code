@@ -119,8 +119,15 @@ namespace AzurePipelineTasks
                     if (!string.IsNullOrEmpty(defaultValue))
                     {
                         var defaultOption = options.FirstOrDefault(p => p.Value.ToString() == defaultValue) ?? options.FirstOrDefault(p => p.Name.ToString() == defaultValue);
-                        defaultValue = defaultOption.Name;
-                        defaultValue = $"{type}.{EnumValueName(defaultValue)}";
+                        if (defaultOption != null)
+                        {
+                            defaultValue = defaultOption.Name;
+                            defaultValue = $"{type}.{EnumValueName(defaultValue)}";
+                        }
+                        else
+                        {
+                            defaultValue = string.Empty;
+                        }
                     }
                     enumType = EnumType(name, options);
                     break;
@@ -148,6 +155,7 @@ namespace AzurePipelineTasks
                 case "querycontrol":
                 case "connectedservice:servicefabric":
                 case "connectedservice:externalpythonuploadfeed":
+                case "connectedservice:github:oauth,personalaccesstoken":
                     // Pull requests welcome :-)
                     return null;
                 default:
