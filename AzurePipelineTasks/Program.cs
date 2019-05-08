@@ -20,7 +20,7 @@ namespace AzurePipelineTasks
 
         private static void RenderTasks(string targetFolder)
         {
-            var tasksDefinitionFiles = Directory.GetFiles(Path.Combine("..", "azure-pipelines-tasks", "Tasks"), "task.json", SearchOption.AllDirectories);
+            var tasksDefinitionFiles = Directory.GetFiles(Path.Combine(targetFolder, "..", "..", "azure-pipelines-tasks", "Tasks"), "task.json", SearchOption.AllDirectories);
             var taskDefinitions = tasksDefinitionFiles.Select(f => JObject.Parse(File.ReadAllText(f))).ToArray();
 
             CreateTaskInterfaces(targetFolder, taskDefinitions);
@@ -114,20 +114,24 @@ namespace AzurePipelineTasks
                         defaultValue = string.IsNullOrEmpty(defaultValue) ? string.Empty : "@\"" + defaultValue.Replace("\"", "\"\"") + "\"";
                         break;
                     }
+
+                    var isMultiSelect = input.ContainsKey("properties") && input["properties"] is JObject prop &&
+                                        prop.ContainsKey("MultiSelectFlatList") &&
+                                        prop["MultiSelectFlatList"].ToString().ToLower() == "true";
+
+                    if (isMultiSelect)
+                    {
+                        // PR welcome :-)
+                        return null;
+                    }
+
                     type = $"{name}Options";
                     var options = (input["options"] as JObject).Children().OfType<JProperty>().ToArray();
                     if (!string.IsNullOrEmpty(defaultValue))
                     {
                         var defaultOption = options.FirstOrDefault(p => p.Value.ToString() == defaultValue) ?? options.FirstOrDefault(p => p.Name.ToString() == defaultValue);
-                        if (defaultOption != null)
-                        {
-                            defaultValue = defaultOption.Name;
-                            defaultValue = $"{type}.{EnumValueName(defaultValue)}";
-                        }
-                        else
-                        {
-                            defaultValue = string.Empty;
-                        }
+                        defaultValue = defaultOption.Name;
+                        defaultValue = $"{type}.{EnumValueName(defaultValue)}";
                     }
                     enumType = EnumType(name, options);
                     break;
