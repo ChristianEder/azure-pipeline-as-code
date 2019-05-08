@@ -30,12 +30,16 @@ namespace UpdateVersionNumber
             var latest = GetLatestVersion(table);
             var latestVersion =
                 latest != null ? new Version(latest.Major + "." + latest.Minor + "." + latest.Patch) : null;
-
+            
+            Console.WriteLine($"Hash: {hash} (latest: {(latest?.Hash ?? "none")})");
+            
             var projectFile = Path.Combine(args[0], "AzurePipelineAsCode.NET.csproj");
             var project = XDocument.Parse(File.ReadAllText(projectFile));
             var projectVersion = new Version(project.Root.Elements("PropertyGroup").First().Element("Version").Value);
             var nextVersion = latest?.Hash == hash ? latestVersion : NextVersion(latestVersion, projectVersion);
 
+            
+            
             if (nextVersion > latestVersion)
             {
                 var next = new NugetPackageEntity(nextVersion.Major.ToString(), nextVersion.Minor.ToString(), nextVersion.Build.ToString(), hash);
