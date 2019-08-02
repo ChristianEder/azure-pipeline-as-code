@@ -163,7 +163,8 @@ namespace AzurePipelineTasks
                     // Pull requests welcome :-)
                     return null;
                 default:
-                    throw new InvalidOperationException();
+                     // Pull requests welcome :-)
+                    return null;
             }
 
             types.Add(input["name"].ToString(), type);
